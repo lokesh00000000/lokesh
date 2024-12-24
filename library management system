@@ -1,0 +1,294 @@
+import java.util.*;
+
+class Book {
+    private String title;
+    private String author;
+    private boolean isAvailable;
+
+    public Book(String title, String author) {
+        this.title = title;
+        this.author = author;
+        this.isAvailable = true;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public boolean isAvailable() {
+        return isAvailable;
+    }
+
+    public void borrowBook() {
+        this.isAvailable = false;
+    }
+
+    public void returnBook() {
+        this.isAvailable = true;
+    }
+
+    @Override
+    public String toString() {
+        return "Title: " + title + ", Author: " + author + ", Available: " + isAvailable;
+    }
+}
+
+class User {
+    private String name;
+    private int id;
+    private List<Book> borrowedBooks;
+
+    public User(String name, int id) {
+        this.name = name;
+        this.id = id;
+        this.borrowedBooks = new ArrayList<>();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public List<Book> getBorrowedBooks() {
+        return borrowedBooks;
+    }
+
+    public void borrowBook(Book book) {
+        if (book.isAvailable()) {
+            borrowedBooks.add(book);
+            book.borrowBook();
+            System.out.println(name + " has borrowed: " + book.getTitle());
+        } else {
+            System.out.println(book.getTitle() + " is not available.");
+        }
+    }
+
+    public void returnBook(Book book) {
+        if (borrowedBooks.contains(book)) {
+            borrowedBooks.remove(book);
+            book.returnBook();
+            System.out.println(name + " has returned: " + book.getTitle());
+        } else {
+            System.out.println(name + " did not borrow " + book.getTitle());
+        }
+    }
+}
+
+class Library {
+    private List<Book> books;
+    private List<User> users;
+
+    public Library() {
+        books = new ArrayList<>();
+        users = new ArrayList<>();
+    }
+
+    public void addBook(Book book) {
+        books.add(book);
+        System.out.println("Added book: " + book.getTitle());
+    }
+
+    public void addUser(User user) {
+        users.add(user);
+        System.out.println("Added user: " + user.getName());
+    }
+
+    public void displayBooks() {
+        System.out.println("\nLibrary Books:");
+        for (Book book : books) {
+            System.out.println(book);
+        }
+    }
+
+    public void displayUsers() {
+        System.out.println("\nLibrary Users:");
+        for (User user : users) {
+            System.out.println("User Name: " + user.getName() + ", Borrowed Books: " + user.getBorrowedBooks().size());
+        }
+    }
+
+    public Book searchBookByTitle(String title) {
+        for (Book book : books) {
+            if (book.getTitle().equalsIgnoreCase(title)) {
+                return book;
+            }
+        }
+        return null;
+    }
+
+    public User searchUserById(int id) {
+        for (User user : users) {
+            if (user.getId() == id) {
+                return user;
+            }
+        }
+        return null;
+    }
+}
+
+class LibraryManagementSystem {
+    private static Library library;
+    private static Scanner scanner;
+
+    public static void main(String[] args) {
+        library = new Library();
+        scanner = new Scanner(System.in);
+
+        // Sample books and users
+        initializeLibrary();
+
+        boolean running = true;
+        while (running) {
+            showMenu();
+            int choice = scanner.nextInt();
+            scanner.nextLine();  // Consume newline
+            switch (choice) {
+                case 1:
+                    addNewBook();
+                    break;
+                case 2:
+                    displayBooks();
+                    break;
+                case 3:
+                    addNewUser();
+                    break;
+                case 4:
+                    displayUsers();
+                    break;
+                case 5:
+                    borrowBook();
+                    break;
+                case 6:
+                    returnBook();
+                    break;
+                case 7:
+                    searchBook();
+                    break;
+                case 8:
+                    searchUser();
+                    break;
+                case 9:
+                    running = false;
+                    System.out.println("Exiting the system...");
+                    break;
+                default:
+                    System.out.println("Invalid choice, please try again.");
+            }
+        }
+    }
+
+    private static void showMenu() {
+        System.out.println("\nLibrary Management System");
+        System.out.println("1. Add a new book");
+        System.out.println("2. Display all books");
+        System.out.println("3. Add a new user");
+        System.out.println("4. Display all users");
+        System.out.println("5. Borrow a book");
+        System.out.println("6. Return a book");
+        System.out.println("7. Search book by title");
+        System.out.println("8. Search user by ID");
+        System.out.println("9. Exit");
+        System.out.print("Enter your choice: ");
+    }
+
+    private static void initializeLibrary() {
+        library.addBook(new Book("To Kill a Mockingbird", "Harper Lee"));
+        library.addBook(new Book("1984", "George Orwell"));
+        library.addBook(new Book("The Great Gatsby", "F. Scott Fitzgerald"));
+        library.addUser(new User("Alice", 1));
+        library.addUser(new User("Bob", 2));
+    }
+
+    private static void addNewBook() {
+        System.out.print("Enter book title: ");
+        String title = scanner.nextLine();
+        System.out.print("Enter book author: ");
+        String author = scanner.nextLine();
+        library.addBook(new Book(title, author));
+    }
+
+    private static void displayBooks() {
+        library.displayBooks();
+    }
+
+    private static void addNewUser() {
+        System.out.print("Enter user name: ");
+        String name = scanner.nextLine();
+        System.out.print("Enter user ID: ");
+        int id = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+        library.addUser(new User(name, id));
+    }
+
+    private static void displayUsers() {
+        library.displayUsers();
+    }
+
+    private static void borrowBook() {
+        System.out.print("Enter user ID: ");
+        int userId = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+        User user = library.searchUserById(userId);
+        if (user != null) {
+            System.out.print("Enter book title to borrow: ");
+            String bookTitle = scanner.nextLine();
+            Book book = library.searchBookByTitle(bookTitle);
+            if (book != null) {
+                user.borrowBook(book);
+            } else {
+                System.out.println("Book not found.");
+            }
+        } else {
+            System.out.println("User not found.");
+        }
+    }
+
+    private static void returnBook() {
+        System.out.print("Enter user ID: ");
+        int userId = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+        User user = library.searchUserById(userId);
+        if (user != null) {
+            System.out.print("Enter book title to return: ");
+            String bookTitle = scanner.nextLine();
+            Book book = library.searchBookByTitle(bookTitle);
+            if (book != null) {
+                user.returnBook(book);
+            } else {
+                System.out.println("Book not found.");
+            }
+        } else {
+            System.out.println("User not found.");
+        }
+    }
+
+    private static void searchBook() {
+        System.out.print("Enter book title to search: ");
+        String title = scanner.nextLine();
+        Book book = library.searchBookByTitle(title);
+        if (book != null) {
+            System.out.println("Book found: " + book);
+        } else {
+            System.out.println("Book not found.");
+        }
+    }
+
+    private static void searchUser() {
+        System.out.print("Enter user ID to search: ");
+        int userId = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+        User user = library.searchUserById(userId);
+        if (user != null) {
+            System.out.println("User found: " + user.getName() + ", Borrowed Books: " + user.getBorrowedBooks().size());
+        } else {
+            System.out.println("User not found.");
+        }
+    }
+}
